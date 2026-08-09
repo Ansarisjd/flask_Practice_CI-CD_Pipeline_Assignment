@@ -12,7 +12,7 @@ pipeline {
             steps {
                 withCredentials([
                     string(
-                        credentialsId: 'mongo-uri',
+                        credentialsId: 'MONGO_URI',
                         variable: 'MONGO_URI'
                     )
                 ]) {
