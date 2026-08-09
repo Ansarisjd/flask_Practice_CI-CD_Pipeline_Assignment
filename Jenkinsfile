@@ -20,5 +20,10 @@ pipeline {
                 }
             }
         }
+       stage('Docker Build') {
+            steps {
+                bat 'docker build -t student-registration-app:latest .'
+            }
+        }
     }
 }
