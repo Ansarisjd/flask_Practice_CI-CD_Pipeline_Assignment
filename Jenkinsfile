@@ -1,47 +1,48 @@
 pipeline {
-agent any
+    agent any
 
-stages {
+    stages {
 
-    stage('Install Dependencies') {
-        steps {
-            bat 'python -m pip install -r requirements.txt'
+        stage('Install Dependencies') {
+            steps {
+                bat 'python -m pip install -r requirements.txt'
+            }
         }
-    }
 
-    stage('Test') {
-        steps {
-            withCredentials([
-                string(
-                    credentialsId: 'MONGO_URI',
-                    variable: 'MONGO_URI'
-                )
-            ]) {
-                bat 'python -m pytest'
+        stage('Test') {
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'MONGO_URI',
+                        variable: 'MONGO_URI'
+                    )
+                ]) {
+                    bat 'python -m pytest'
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                bat 'docker build -t student-registration-app:latest .'
+            }
+        }
+
+        stage('ECR Login') {
+            steps {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-ecr']
+                ]) {
+                    bat 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 251523190381.dkr.ecr.us-east-1.amazonaws.com'
+                }
+            }
+        }
+
+        stage('Docker Tag') {
+            steps {
+                bat 'docker tag student-registration-app:latest 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest'
             }
         }
     }
-
-    stage('Docker Build') {
-        steps {
-            bat 'docker build -t student-registration-app:latest .'
-        }
-    }
-
-    stage('ECR Login Test') {
-steps {
-    withCredentials([
-        [$class: 'AmazonWebServicesCredentialsBinding',
-         credentialsId: 'aws-ecr']
-    ]) {
-        bat 'docker context show'
-        bat 'docker info'
-        bat 'aws sts get-caller-identity'
-        bat 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 251523190381.dkr.ecr.us-east-1.amazonaws.com'
-    }
-}
-
-
-}
-}
 }
