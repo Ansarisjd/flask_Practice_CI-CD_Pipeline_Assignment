@@ -9,22 +9,6 @@ pipeline {
             }
         }
 
-        stage('MongoDB Connection Test') {
-            steps {
-                withCredentials([
-                    string(
-                        credentialsId: 'MONGO_URI',
-                        variable: 'MONGO_URI'
-                    )
-                ]) {
-                    bat 'python -c "import ssl; print(ssl.OPENSSL_VERSION)"'
-                    bat 'python -c "import certifi; print(certifi.where())"'
-                    bat 'python -c "import pymongo; print(pymongo.version)"'
-                    bat 'if defined MONGO_URI (echo MONGO_URI exists: YES) else (echo MONGO_URI exists: NO)'
-                }
-            }
-        }
-
         stage('Test') {
             steps {
                 withCredentials([
