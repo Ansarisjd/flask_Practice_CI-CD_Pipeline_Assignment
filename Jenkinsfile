@@ -20,7 +20,7 @@ pipeline {
                     bat 'python -c "import ssl; print(ssl.OPENSSL_VERSION)"'
                     bat 'python -c "import certifi; print(certifi.where())"'
                     bat 'python -c "import pymongo; print(pymongo.version)"'
-                    bat 'python -c "import os; print(bool(os.environ.get(\"MONGO_URI\")))"'
+                    bat 'if defined MONGO_URI (echo MONGO_URI exists: YES) else (echo MONGO_URI exists: NO)'
                 }
             }
         }
