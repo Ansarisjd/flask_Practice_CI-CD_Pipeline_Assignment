@@ -44,5 +44,10 @@ pipeline {
                 bat 'docker tag student-registration-app:latest 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest'
             }
         }
+       stage('Docker Push') {
+            steps {
+               bat 'docker push 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest'
+    }
+}
     }
 }
