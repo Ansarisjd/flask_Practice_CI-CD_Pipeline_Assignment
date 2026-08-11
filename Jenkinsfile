@@ -50,21 +50,33 @@ pipeline {
     }
 }
 
-stage('Test EC2 SSH') {
-            steps {
-                withCredentials([
-                    sshUserPrivateKey(
-                        credentialsId: '4a82c7e8-1eb2-430c-bbbc-f62e63d03635',
-                        keyFileVariable: 'SSH_KEY',
-                        usernameVariable: 'SSH_USER'
-                    )
-                ]) {
-                    bat '''
-                        ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@3.89.107.221 "echo EC2 SSH connection successful"
-                    '''
-                }
-            }
+stage('Deploy to EC2') {
+    steps {
+        withCredentials([
+            sshUserPrivateKey(
+                credentialsId: '4a82c7e8-1eb2-430c-bbbc-f62e63d03635',
+                keyFileVariable: 'SSH_KEY',
+                usernameVariable: 'SSH_USER'
+            )
+        ]) {
+            bat '''
+                icacls "%SSH_KEY%" /inheritance:r
+                icacls "%SSH_KEY%" /remove "BUILTIN\\Users"
+                icacls "%SSH_KEY%" /grant:r "SYSTEM:F"
+
+                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@3.89.107.221 "aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin 251523190381.dkr.ecr.us-east-1.amazonaws.com"
+
+                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@3.89.107.221 "sudo docker pull 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest"
+
+                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@3.89.107.221 "sudo docker stop student-registration-app || true"
+
+                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@3.89.107.221 "sudo docker rm student-registration-app || true"
+
+                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@3.89.107.221 "sudo docker run -d --name student-registration-app --env-file /home/ubuntu/student-registration.env -p 5000:5000 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest"
+            '''
         }
+    }
+}
 
     }
 }
