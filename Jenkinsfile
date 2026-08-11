@@ -54,7 +54,7 @@ stage('Deploy to EC2') {
     steps {
         withCredentials([
             sshUserPrivateKey(
-                credentialsId: '4a82c7e8-1eb2-430c-bbbc-f62e63d03635',
+                credentialsId: 'ec2-jenkins-ssh',
                 keyFileVariable: 'SSH_KEY',
                 usernameVariable: 'SSH_USER'
             )
@@ -77,6 +77,5 @@ stage('Deploy to EC2') {
         }
     }
 }
-
     }
 }
