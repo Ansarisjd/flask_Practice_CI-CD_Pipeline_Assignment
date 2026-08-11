@@ -24,7 +24,8 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t student-registration-app:latest .'
+                 bat 'echo Git Commit SHA: %GIT_COMMIT%'
+                 bat 'docker build -t student-registration-app:%GIT_COMMIT% .'
             }
         }
 
@@ -41,13 +42,13 @@ pipeline {
 
         stage('Docker Tag') {
             steps {
-                bat 'docker tag student-registration-app:latest 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest'
+                 bat 'docker tag student-registration-app:%GIT_COMMIT% 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:%GIT_COMMIT%'
             }
         }
 
         stage('Docker Push') {
             steps {
-                bat 'docker push 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest'
+                bat 'docker push 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:%GIT_COMMIT%'
             }
         }
 
@@ -65,13 +66,13 @@ pipeline {
 
                         ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin 251523190381.dkr.ecr.us-east-1.amazonaws.com"
 
-                        ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "sudo docker pull 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest"
+                        ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "sudo docker pull 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:%GIT_COMMIT%"
 
                         ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "sudo docker stop student-registration-app || true"
 
                         ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "sudo docker rm student-registration-app || true"
 
-                        ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "sudo docker run -d --name student-registration-app --env-file /home/ubuntu/student-registration.env -p 5000:5000 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest"
+                        ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "sudo docker run -d --name student-registration-app --env-file /home/ubuntu/student-registration.env -p 5000:5000 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:%GIT_COMMIT%"
                     '''
                 }
             }
