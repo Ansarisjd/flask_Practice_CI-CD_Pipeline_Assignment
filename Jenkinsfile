@@ -49,5 +49,22 @@ pipeline {
                bat 'docker push 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:latest'
     }
 }
+
+stage('Test EC2 SSH') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: '4a82c7e8-1eb2-430c-bbbc-f62e63d03635',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
+                    bat '''
+                        ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" %SSH_USER%@3.89.107.221 "echo EC2 SSH connection successful"
+                    '''
+                }
+            }
+        }
+
     }
 }
