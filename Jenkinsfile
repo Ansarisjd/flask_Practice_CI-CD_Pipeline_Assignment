@@ -76,5 +76,22 @@ pipeline {
                 }
             }
         }
+stage('Verify Deployment') {
+    steps {
+        withCredentials([
+            file(
+                credentialsId: 'ec2-jenkins-ssh',
+                variable: 'SSH_KEY'
+            )
+        ]) {
+            bat '''
+                icacls "%SSH_KEY%" /inheritance:r
+                icacls "%SSH_KEY%" /grant:r "SYSTEM:F"
+
+                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "curl -f http://localhost:5000/health"
+            '''
+        }
+    }
+}
     }
 }
