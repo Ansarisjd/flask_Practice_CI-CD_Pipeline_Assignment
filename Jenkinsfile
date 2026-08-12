@@ -24,8 +24,8 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                 bat 'echo Git Commit SHA: %GIT_COMMIT%'
-                 bat 'docker build -t student-registration-app:%GIT_COMMIT% .'
+                bat 'echo Git Commit SHA: %GIT_COMMIT%'
+                bat 'docker build -t student-registration-app:%GIT_COMMIT% .'
             }
         }
 
@@ -42,7 +42,7 @@ pipeline {
 
         stage('Docker Tag') {
             steps {
-                 bat 'docker tag student-registration-app:%GIT_COMMIT% 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:%GIT_COMMIT%'
+                bat 'docker tag student-registration-app:%GIT_COMMIT% 251523190381.dkr.ecr.us-east-1.amazonaws.com/student-registration-system-registry:%GIT_COMMIT%'
             }
         }
 
@@ -77,25 +77,27 @@ pipeline {
                 }
             }
         }
-stage('Verify Deployment') {
-    steps {
-        withCredentials([
-            file(
-                credentialsId: 'ec2-jenkins-ssh',
-                variable: 'SSH_KEY'
-            )
-        ]) {
-            bat '''
-                icacls "%SSH_KEY%" /inheritance:r
-                icacls "%SSH_KEY%" /grant:r "SYSTEM:F"
 
-                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@100.53.95.23 "curl -f http://localhost:5000/health"
-            '''
+        stage('Verify Deployment') {
+            steps {
+                withCredentials([
+                    file(
+                        credentialsId: 'ec2-jenkins-ssh',
+                        variable: 'SSH_KEY'
+                    )
+                ]) {
+                    bat '''
+                        icacls "%SSH_KEY%" /inheritance:r
+                        icacls "%SSH_KEY%" /grant:r "SYSTEM:F"
+
+                        ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@100.53.95.23 "curl -f http://localhost:5000/health"
+                    '''
+                }
+            }
         }
     }
-}
 
-post {
+    post {
 
         success {
             mail(
@@ -108,6 +110,9 @@ Build: #${env.BUILD_NUMBER}
 Status: ${currentBuild.currentResult}
 
 Application deployed successfully to EC2.
+
+Git Commit:
+${env.GIT_COMMIT}
 
 Build URL:
 ${env.BUILD_URL}
@@ -127,13 +132,13 @@ Status: ${currentBuild.currentResult}
 
 Please check the Jenkins console output.
 
+Git Commit:
+${env.GIT_COMMIT}
+
 Build URL:
 ${env.BUILD_URL}
 """
             )
         }
-    }
-
-
     }
 }
