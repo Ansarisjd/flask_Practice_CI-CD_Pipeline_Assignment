@@ -89,7 +89,7 @@ stage('Verify Deployment') {
                 icacls "%SSH_KEY%" /inheritance:r
                 icacls "%SSH_KEY%" /grant:r "SYSTEM:F"
 
-                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@3.89.107.221 "curl -f http://localhost:5000/health"
+                ssh -o StrictHostKeyChecking=no -i "%SSH_KEY%" ubuntu@100.53.95.23 "curl -f http://localhost:5000/health"
             '''
         }
     }
