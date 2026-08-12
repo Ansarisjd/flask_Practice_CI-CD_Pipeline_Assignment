@@ -94,5 +94,46 @@ stage('Verify Deployment') {
         }
     }
 }
+
+post {
+
+        success {
+            mail(
+                to: 'ansarisjdmohd3072@gmail.com',
+                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Jenkins Pipeline Successful
+
+Job: ${env.JOB_NAME}
+Build: #${env.BUILD_NUMBER}
+Status: ${currentBuild.currentResult}
+
+Application deployed successfully to EC2.
+
+Build URL:
+${env.BUILD_URL}
+"""
+            )
+        }
+
+        failure {
+            mail(
+                to: 'ansarisjdmohd3072@gmail.com',
+                subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Jenkins Pipeline Failed
+
+Job: ${env.JOB_NAME}
+Build: #${env.BUILD_NUMBER}
+Status: ${currentBuild.currentResult}
+
+Please check the Jenkins console output.
+
+Build URL:
+${env.BUILD_URL}
+"""
+            )
+        }
+    }
+
+
     }
 }
